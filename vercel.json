@@ -1,8 +1,4 @@
 {
-  "buildCommand": "cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput",
-  "outputDirectory": "backend/staticfiles",
-  "installCommand": "cd backend && pip install -r requirements.txt",
-  "framework": null,
   "rewrites": [
     {
       "source": "/static/:match*",

@@ -2,17 +2,19 @@ import os
 import sys
 
 # Add backend to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
+backend_dir = os.path.join(os.path.dirname(__file__), 'backend')
+sys.path.insert(0, backend_dir)
 
 # Set Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gongoni.settings')
 
-# Initialize Django
+# Import and setup Django
 import django
 django.setup()
 
-# Import WSGI app
-from gongoni.wsgi import application
+# Import Django's ASGI handler (better for serverless)
+from django.core.asgi import get_asgi_application
+asgi_app = get_asgi_application()
 
-# Vercel expects this
-app = application
+# For Vercel - use ASGI
+app = asgi_app

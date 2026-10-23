@@ -1,22 +1,18 @@
 {
-  "services": {
-    "gongoni": {
-      "root": ".",
-      "framework": "python",
-      "runtime": "python",
-      "buildCommand": "cd backend && python manage.py collectstatic --noinput"
-    }
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/static/(.*)",
-      "destination": "/backend/staticfiles/$1"
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/backend/staticfiles/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": {
-        "service": "gongoni"
-      }
+      "src": "/(.*)",
+      "dest": "/api/index.py"
     }
   ]
 }

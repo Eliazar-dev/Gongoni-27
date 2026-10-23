@@ -1,4 +1,8 @@
 {
+  "buildCommand": "bash build.sh",
+  "outputDirectory": "backend/staticfiles",
+  "installCommand": "python -m pip install -r requirements.txt",
+  "framework": null,
   "rewrites": [
     {
       "source": "/static/:match*",

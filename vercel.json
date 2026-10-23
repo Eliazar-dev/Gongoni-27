@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "installCommand": "cd frontend && npm install",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.py": {
       "maxDuration": 30,
@@ -10,9 +13,6 @@
   },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index?__p=:path*" },
-    { "source": "/static/:path*", "destination": "/frontend/dist/static/:path*" },
-    { "source": "/assets/:path*", "destination": "/frontend/dist/assets/:path*" },
-    { "source": "/sda-logos.png", "destination": "/frontend/dist/sda-logos.png" },
-    { "source": "/(.*)", "destination": "/frontend/dist/index.html" }
+    { "source": "/((?!assets/|sda-logos.png).*)", "destination": "/index.html" }
   ]
 }

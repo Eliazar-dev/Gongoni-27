@@ -16,5 +16,9 @@ django.setup()
 # Import WSGI app
 from gongoni.wsgi import application
 
-# Vercel expects 'app' to be the handler
+# Vercel serverless function handler
+def handler(event, context):
+    return application
+
+# For Vercel compatibility
 app = application

@@ -1,13 +1,8 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "backend/gongoni/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "runtime": "python3.11"
-      }
+      "src": "backend/api/index.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -17,10 +12,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/backend/gongoni/wsgi.py"
+      "dest": "/backend/api/index.py"
     }
-  ],
-  "env": {
-    "DJANGO_SETTINGS_MODULE": "gongoni.settings"
-  }
+  ]
 }

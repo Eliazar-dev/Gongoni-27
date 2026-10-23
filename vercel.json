@@ -1,18 +1,16 @@
 {
-  "builds": [
+  "buildCommand": "cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput",
+  "outputDirectory": "backend/staticfiles",
+  "installCommand": "cd backend && pip install -r requirements.txt",
+  "framework": null,
+  "rewrites": [
     {
-      "src": "backend/api/index.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/backend/staticfiles/$1"
+      "source": "/static/:match*",
+      "destination": "/backend/staticfiles/:match*"
     },
     {
-      "src": "/(.*)",
-      "dest": "/backend/api/index.py"
+      "source": "/(.*)",
+      "destination": "/backend/api/index.py"
     }
   ]
 }

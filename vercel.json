@@ -10,7 +10,9 @@
   },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index?__p=:path*" },
-    { "source": "/static/:path*", "destination": "/frontend/dist/:path*" },
-    { "source": "/((?!assets/|sda-logos.png).*)", "destination": "/index.html" }
+    { "source": "/static/:path*", "destination": "/frontend/dist/static/:path*" },
+    { "source": "/assets/:path*", "destination": "/frontend/dist/assets/:path*" },
+    { "source": "/sda-logos.png", "destination": "/frontend/dist/sda-logos.png" },
+    { "source": "/(.*)", "destination": "/frontend/dist/index.html" }
   ]
 }

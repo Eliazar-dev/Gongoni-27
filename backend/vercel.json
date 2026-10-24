@@ -1,4 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null
+  "buildCommand": "pip install -r requirements.txt",
+  "outputDirectory": ".",
+  "functions": {
+    "gongoni/wsgi.py": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/gongoni/wsgi.py"
+    }
+  ]
 }

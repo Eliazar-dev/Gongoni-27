@@ -53,12 +53,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
+    "corsheaders",
     "tracker",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -111,7 +112,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [FRONTEND_DIST] if FRONTEND_DIST.exists() else []
+STATICFILES_DIRS = []
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
@@ -130,6 +131,10 @@ REST_FRAMEWORK = {
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# --- CORS settings for separate frontend/backend deployment ---
+CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+CORS_ALLOW_CREDENTIALS = True
 
 # --- Mission settings --------------------------------------------------------
 MISSION_NAME = env("MISSION_NAME", "Gongoni Mission 27")

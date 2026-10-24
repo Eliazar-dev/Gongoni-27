@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'gn27_token'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 export const getToken = () => {
   try { return localStorage.getItem(TOKEN_KEY) } catch { return null }
@@ -24,7 +25,7 @@ export async function api(path, { method = 'GET', body, auth = true } = {}) {
   if (auth && token) headers.Authorization = `Token ${token}`
   let res
   try {
-    res = await fetch(`/api${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined })
+    res = await fetch(`${API_BASE_URL}/api${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined })
   } catch {
     throw new ApiError(0, { detail: 'No connection. Please check your internet and try again.' })
   }
@@ -42,7 +43,7 @@ export async function api(path, { method = 'GET', body, auth = true } = {}) {
 }
 
 export async function download(path, fallbackName) {
-  const res = await fetch(`/api${path}`, { headers: { Authorization: `Token ${getToken()}` } })
+  const res = await fetch(`${API_BASE_URL}/api${path}`, { headers: { Authorization: `Token ${getToken()}` } })
   if (!res.ok) throw new ApiError(res.status, { detail: 'Download failed' })
   const match = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') || '')
   const url = URL.createObjectURL(await res.blob())

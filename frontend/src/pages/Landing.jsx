@@ -77,7 +77,7 @@ function SignIn({ onIn }) {
       </div>
       {general && <p className="banner error" role="alert">{general}</p>}
       <button className="btn primary lg" type="submit" disabled={busy}>{busy ? 'Opening…' : 'Open my tracker'}</button>
-      <p className="hint center">Use the same email and phone number you registered with.</p>
+      <p className="hint center">Please Use the same email and phone number you registered with.</p>
     </form>
   )
 }

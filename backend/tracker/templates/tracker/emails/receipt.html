@@ -1,0 +1,75 @@
+{% extends "tracker/emails/base.html" %}
+
+{% block preheader %}KES {{ amount }} received. You've paid {{ progress.percent }}% of your target.{% endblock %}
+
+{% block hero %}
+<tr>
+  <td style="padding:32px 32px 0;text-align:center;">
+    <div style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:{% if progress.completed %}#f5c542{% else %}#e3f1e8{% endif %};color:#1f4d3a;font-size:28px;font-weight:700;">&#10003;</div>
+    <div style="font-size:13px;color:#6b7a72;margin-top:14px;text-transform:uppercase;letter-spacing:1px;">Payment confirmed</div>
+    <div style="font-size:36px;font-weight:800;color:#1f4d3a;margin-top:4px;">KES {{ amount }}</div>
+  </td>
+</tr>
+{% endblock %}
+
+{% block content %}
+<p style="margin:0 0 16px;">Dear {{ member.first_name }},</p>
+<p style="margin:0 0 24px;">We've received your payment for {{ mission }}. Thank you!</p>
+
+{% if progress.completed %}
+<div style="background:#fff8e1;border:1px solid #f5c542;border-radius:12px;padding:16px 20px;margin-bottom:24px;text-align:center;">
+  <div style="font-size:18px;font-weight:700;color:#7a5b00;">&#127881; Target completed!</div>
+  <div style="font-size:14px;color:#7a5b00;margin-top:4px;">Congratulations, you've paid your full mission target.</div>
+</div>
+{% endif %}
+
+<div style="font-size:13px;font-weight:600;color:#1f4d3a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Your progress</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:999px;overflow:hidden;background:#e7ece9;">
+  <tr>
+    {% if progress.percent >= 100 %}
+    <td height="14" style="background:#2e7d55;font-size:0;line-height:0;">&nbsp;</td>
+    {% elif progress.percent > 0 %}
+    <td width="{{ progress.percent }}%" height="14" style="background:#2e7d55;font-size:0;line-height:0;">&nbsp;</td>
+    <td height="14" style="font-size:0;line-height:0;">&nbsp;</td>
+    {% else %}
+    <td height="14" style="font-size:0;line-height:0;">&nbsp;</td>
+    {% endif %}
+  </tr>
+</table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;font-size:13px;color:#4b5a52;">
+  <tr>
+    <td><strong style="color:#1f4d3a;font-size:16px;">{{ progress.percent }}%</strong> paid</td>
+    <td align="right">Target KES {{ target }}</td>
+  </tr>
+</table>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0 24px;">
+  <tr>
+    <td width="50%" style="padding-right:6px;">
+      <div style="background:#e3f1e8;border-radius:12px;padding:14px 16px;">
+        <div style="font-size:12px;color:#4b5a52;">Total paid</div>
+        <div style="font-size:20px;font-weight:700;color:#1f4d3a;">KES {{ paid }}</div>
+      </div>
+    </td>
+    <td width="50%" style="padding-left:6px;">
+      <div style="background:{% if progress.completed %}#e3f1e8{% else %}#fdf0e6{% endif %};border-radius:12px;padding:14px 16px;">
+        <div style="font-size:12px;color:#4b5a52;">Balance</div>
+        <div style="font-size:20px;font-weight:700;color:{% if progress.completed %}#1f4d3a{% else %}#b4561b{% endif %};">KES {{ balance }}</div>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<div style="font-size:13px;font-weight:600;color:#1f4d3a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Receipt</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;border:1px solid #ece9e1;border-radius:12px;">
+  <tr><td style="padding:10px 16px;color:#6b7a72;border-bottom:1px solid #ece9e1;">Receipt no.</td><td align="right" style="padding:10px 16px;font-weight:600;border-bottom:1px solid #ece9e1;">{{ payment.receipt_no }}</td></tr>
+  <tr><td style="padding:10px 16px;color:#6b7a72;border-bottom:1px solid #ece9e1;">Reference</td><td align="right" style="padding:10px 16px;font-family:monospace;border-bottom:1px solid #ece9e1;">{{ payment.reference }}</td></tr>
+  <tr><td style="padding:10px 16px;color:#6b7a72;border-bottom:1px solid #ece9e1;">Date</td><td align="right" style="padding:10px 16px;border-bottom:1px solid #ece9e1;">{{ paid_on }}</td></tr>
+  {% if channel %}<tr><td style="padding:10px 16px;color:#6b7a72;border-bottom:1px solid #ece9e1;">Paid via</td><td align="right" style="padding:10px 16px;border-bottom:1px solid #ece9e1;">{{ channel }}</td></tr>{% endif %}
+  <tr><td style="padding:10px 16px;color:#6b7a72;">Member code</td><td align="right" style="padding:10px 16px;">{{ member.code }}</td></tr>
+</table>
+
+{% if not progress.completed %}
+<p style="margin:24px 0 0;color:#4b5a52;">You can pay the balance in as many instalments as you like. You'll get an updated receipt after every payment.</p>
+{% endif %}
+{% endblock %}

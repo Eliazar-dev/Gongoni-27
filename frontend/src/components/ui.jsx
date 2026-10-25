@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../api.js'
 
 export const ToastCtx = createContext(() => {})
@@ -29,6 +30,10 @@ export function useLoad(path) {
   return { ...state, reload: () => setTick((t) => t + 1) }
 }
 
+export function BackLink({ to, children = 'Back to list' }) {
+  return <Link className="back-link" to={to}><span aria-hidden="true">←</span> {children}</Link>
+}
+
 export function Spinner() {
   return <div className="loading"><div className="spinner big" /></div>
 }
@@ -43,9 +48,9 @@ const MEMBER_STATUS = {
   unpaid: ['Not started', 'grey'],
 }
 const PAYMENT_STATUS = {
-  recorded: ['Recorded', 'green'],
-  review: ['Confirm match', 'amber'],
-  unassigned: ['Unassigned', 'red'],
+  success: ['Paid', 'green'],
+  pending: ['Pending', 'amber'],
+  failed: ['Failed', 'red'],
   reversed: ['Reversed', 'grey'],
 }
 

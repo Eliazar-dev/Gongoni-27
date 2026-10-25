@@ -1,5 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pip install -r requirements.txt",
-  "outputDirectory": "."
+  "functions": {
+    "api/index.py": { "maxDuration": 30 }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
 }

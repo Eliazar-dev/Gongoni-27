@@ -1,0 +1,38 @@
+{% extends "tracker/emails/base.html" %}
+
+{% block preheader %}You're registered. Your target is KES {{ target }}.{% endblock %}
+
+{% block hero %}
+<tr>
+  <td style="padding:32px 32px 0;text-align:center;">
+    <div style="font-size:28px;font-weight:800;color:#1f4d3a;">Welcome, {{ member.first_name }}!</div>
+    <div style="font-size:14px;color:#6b7a72;margin-top:6px;">Thank you for registering for {{ mission }}.</div>
+  </td>
+</tr>
+{% endblock %}
+
+{% block content %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+  <tr>
+    <td width="50%" style="padding-right:6px;">
+      <div style="background:#e3f1e8;border-radius:12px;padding:14px 16px;">
+        <div style="font-size:12px;color:#4b5a52;">Your target</div>
+        <div style="font-size:20px;font-weight:700;color:#1f4d3a;">KES {{ target }}</div>
+      </div>
+    </td>
+    <td width="50%" style="padding-left:6px;">
+      <div style="background:#f8f7f3;border-radius:12px;padding:14px 16px;">
+        <div style="font-size:12px;color:#4b5a52;">Member code</div>
+        <div style="font-size:20px;font-weight:700;color:#1f4d3a;">{{ member.code }}</div>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<div style="font-size:13px;font-weight:600;color:#1f4d3a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">How it works</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#4b5a52;">
+  <tr><td width="32" valign="top" style="padding:6px 0;"><span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:#1f4d3a;color:#fff;font-size:12px;">1</span></td><td style="padding:6px 0;">Pay online with M-Pesa or card, any amount at a time.</td></tr>
+  <tr><td width="32" valign="top" style="padding:6px 0;"><span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:#1f4d3a;color:#fff;font-size:12px;">2</span></td><td style="padding:6px 0;">After each payment we email a receipt showing your progress and balance.</td></tr>
+  <tr><td width="32" valign="top" style="padding:6px 0;"><span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:#1f4d3a;color:#fff;font-size:12px;">3</span></td><td style="padding:6px 0;">Keep going until you reach 100% of your target.</td></tr>
+</table>
+{% endblock %}

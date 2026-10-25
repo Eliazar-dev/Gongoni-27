@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f1ec;font-family:'Poppins','Segoe UI',Helvetica,Arial,sans-serif;color:#1f2a24;">
+<span style="display:none;max-height:0;overflow:hidden;opacity:0;">{% block preheader %}{% endblock %}</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f1ec;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(31,42,36,0.08);">
+        <tr>
+          <td style="background:#1f4d3a;padding:28px 32px;text-align:center;">
+            <div style="font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#b8d8c6;">Mission tracker</div>
+            <div style="font-size:24px;font-weight:700;color:#ffffff;margin-top:6px;">{{ mission }}</div>
+          </td>
+        </tr>
+        {% block hero %}{% endblock %}
+        <tr>
+          <td style="padding:28px 32px 8px;font-size:15px;line-height:1.6;">
+            {% block content %}{% endblock %}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 32px 28px;font-size:14px;line-height:1.6;color:#4b5a52;">
+            God bless you,<br><strong style="color:#1f4d3a;">{{ mission }}</strong>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f8f7f3;padding:16px 32px;text-align:center;font-size:12px;color:#8a948e;border-top:1px solid #ece9e1;">
+            You're receiving this because you registered for {{ mission }}.<br>
+            Keep this email as your record.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

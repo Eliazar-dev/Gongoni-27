@@ -76,6 +76,16 @@ export function fieldErrors(err) {
 export const num = (v) => Number(v || 0)
 export const kes = (v) => 'KES ' + num(v).toLocaleString('en-KE', { maximumFractionDigits: 2 })
 export const plain = (v) => num(v).toLocaleString('en-KE', { maximumFractionDigits: 2 })
-export const when = (iso) =>
-  new Date(iso).toLocaleString('en-KE', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
+export const when = (iso) => `${new Date(iso).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}, ${whenTime(iso)}`
 export const whenDate = (iso) => new Date(iso).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })
+export const whenDay = (iso) =>
+  new Date(iso).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Nairobi' })
+/** Always 12-hour with AM/PM, e.g. "7:31 PM". */
+export function whenTime(iso) {
+  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Africa/Nairobi' })
+}
+/** 254793515066 -> 0793 515 066 */
+export const phoneLocal = (p) => {
+  const m = /^254(\d{3})(\d{3})(\d{3})$/.exec(p || '')
+  return m ? `0${m[1]} ${m[2]} ${m[3]}` : p
+}

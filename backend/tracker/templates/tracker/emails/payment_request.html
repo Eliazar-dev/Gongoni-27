@@ -1,0 +1,52 @@
+{% extends "tracker/emails/base.html" %}
+
+{% block preheader %}Please pay KES {{ amount }} toward your mission commitment. Balance KES {{ balance }}.{% endblock %}
+
+{% block hero %}
+<tr>
+  <td style="padding:32px 32px 0;text-align:center;">
+    <div style="font-size:13px;color:#6b7a72;text-transform:uppercase;letter-spacing:1px;">Payment request</div>
+    <div style="font-size:36px;font-weight:800;color:#1f4d3a;margin-top:4px;">KES {{ amount }}</div>
+  </td>
+</tr>
+{% endblock %}
+
+{% block content %}
+<p style="margin:0 0 16px;">Dear {{ member.first_name }},</p>
+<p style="margin:0 0 20px;">This is a friendly request to pay <strong>KES {{ amount }}</strong> toward your {{ mission }} commitment.</p>
+
+{% if message %}
+<div style="background:#f8f7f3;border-left:4px solid #1f4d3a;border-radius:8px;padding:14px 16px;margin-bottom:24px;font-size:14px;color:#4b5a52;white-space:pre-line;">{{ message }}</div>
+{% endif %}
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+  <tr>
+    <td align="center">
+      <a href="{{ pay_url }}" style="display:inline-block;background:#1f4d3a;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:12px;">Pay KES {{ amount }} now</a>
+      <div style="font-size:12px;color:#8a948e;margin-top:10px;">Secure checkout by Paystack · M-Pesa or card</div>
+    </td>
+  </tr>
+</table>
+
+<div style="font-size:13px;font-weight:600;color:#1f4d3a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Your progress so far</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:999px;overflow:hidden;background:#e7ece9;">
+  <tr>
+    {% if progress.percent >= 100 %}
+    <td height="12" style="background:#2e7d55;font-size:0;line-height:0;">&nbsp;</td>
+    {% elif progress.percent > 0 %}
+    <td width="{{ progress.percent }}%" height="12" style="background:#2e7d55;font-size:0;line-height:0;">&nbsp;</td>
+    <td height="12" style="font-size:0;line-height:0;">&nbsp;</td>
+    {% else %}
+    <td height="12" style="font-size:0;line-height:0;">&nbsp;</td>
+    {% endif %}
+  </tr>
+</table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;font-size:14px;">
+  <tr>
+    <td style="color:#4b5a52;">Paid <strong style="color:#1f4d3a;">KES {{ paid }}</strong> ({{ progress.percent }}%)</td>
+    <td align="right" style="color:#4b5a52;">Balance <strong style="color:#b4561b;">KES {{ balance }}</strong></td>
+  </tr>
+</table>
+
+<p style="margin:24px 0 0;font-size:13px;color:#8a948e;">If the button does not work, copy this link into your browser:<br><a href="{{ pay_url }}" style="color:#1f4d3a;word-break:break-all;">{{ pay_url }}</a></p>
+{% endblock %}

@@ -25,28 +25,15 @@ function Daily({ days }) {
 export default function Dashboard() {
   const { data, loading, error } = useLoad('/dashboard/')
   if (!data) return error ? <div className="page"><p className="banner error">{error}</p></div> : <Spinner />
-  const attention = data.unassigned + data.review
 
   return (
     <div className="page">
       <div className="page-head">
         <div><h1>Dashboard</h1><p>Gongoni Mission 27 giving at a glance {loading && '· updating…'}</p></div>
+        <Link className="btn gold" to="/admin/request">Request payment</Link>
       </div>
 
       <div className="grid">
-        {attention > 0 && (
-          <div className="alert warn">
-            <span><b>{attention}</b> {attention === 1 ? 'payment needs' : 'payments need'} your attention. The payer could not be matched to a member for sure.</span>
-            <Link className="btn small" to="/admin/payments?tab=attention">Review now</Link>
-          </div>
-        )}
-        {data.unparsed > 0 && (
-          <div className="alert bad">
-            <span><b>{data.unparsed}</b> {data.unparsed === 1 ? 'message was' : 'messages were'} received from the phone but could not be read.</span>
-            <Link className="btn small" to="/admin/payments?tab=log">See messages</Link>
-          </div>
-        )}
-
         <div className="tile hero-stat">
           <small>Raised so far</small>
           <div className="big">{kes(data.raised)} <em>of {kes(data.target_total)}</em></div>
@@ -71,12 +58,12 @@ export default function Dashboard() {
             {data.recent.length === 0 ? <Empty>No payments yet.</Empty> : (
               <div>
                 {data.recent.map((p) => (
-                  <div className="payrow" key={p.id}>
+                  <Link className="payrow" key={p.id} to={`/admin/payments/${p.id}`}>
                     <div><b>{p.member?.name}</b><small>{when(p.paid_at)}</small></div>
                     <strong style={{ fontSize: 16 }}>{plain(p.amount)}</strong>
-                  </div>
+                  </Link>
                 ))}
-                <p style={{ marginTop: 10 }}><Link to="/admin/payments?tab=all">All payments</Link></p>
+                <p style={{ marginTop: 10 }}><Link to="/admin/payments">All payments</Link></p>
               </div>
             )}
           </div>

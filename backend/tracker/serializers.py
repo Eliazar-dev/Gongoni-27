@@ -1,4 +1,3 @@
-import math
 import re
 import uuid
 from decimal import Decimal
@@ -6,16 +5,27 @@ from decimal import Decimal
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import IncomingMessage, Member, NotificationLog, Payment
-from .services.phones import normalize_phone
+from .emails import percent_of
+from .models import Member, Payment
 
 PHONE_ERROR = "Enter a valid Kenyan phone number, for example 0712 345 678."
 
 
+def normalize_phone(raw):
+    """Return a Kenyan number as 2547XXXXXXXX / 2541XXXXXXXX, or None if it is not valid."""
+    value = re.sub(r"[\s\-().]", "", str(raw or "")).removeprefix("+")
+    if re.fullmatch(r"0[17]\d{8}", value):
+        return "254" + value[1:]
+    if re.fullmatch(r"[17]\d{8}", value):
+        return "254" + value
+    if re.fullmatch(r"254[17]\d{8}", value):
+        return value
+    return None
+
+
 def clean_name(value):
     value = re.sub(r"\s+", " ", str(value or "")).strip()
-    words = [w for w in value.split(" ") if w]
-    if len(words) < 2:
+    if len(value.split(" ")) < 2:
         raise serializers.ValidationError("Please enter your full name (at least two names).")
     return value
 
@@ -27,12 +37,21 @@ def clean_phone(value):
     return phone
 
 
+def clean_email(value, exclude_pk=None):
+    email = value.strip().lower()
+    taken = Member.objects.filter(email__iexact=email)
+    if exclude_pk:
+        taken = taken.exclude(pk=exclude_pk)
+    if taken.exists():
+        raise serializers.ValidationError("This email is already registered. Use Track progress to sign in.")
+    return email
+
+
 class RegisterSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=120)
     email = serializers.EmailField()
     phone = serializers.CharField(max_length=30)
     duration = serializers.ChoiceField(choices=[c[0] for c in Member.DURATION_CHOICES])
-    mpesa_phone = serializers.CharField(max_length=30)
     website = serializers.CharField(required=False, allow_blank=True)  # hidden trap field for bots
 
     def validate_name(self, value):
@@ -44,27 +63,27 @@ class RegisterSerializer(serializers.Serializer):
             raise serializers.ValidationError("This phone number is already registered.")
         return phone
 
-    def validate_mpesa_phone(self, value):
-        return clean_phone(value)
-
     def validate_email(self, value):
-        return value.strip().lower()
+        return clean_email(value)
 
     def validate(self, attrs):
-        if attrs.get("website"):
+        if attrs.pop("website", None):
             raise serializers.ValidationError("Invalid submission.")
-        attrs.pop("website", None)
         return attrs
 
     def create(self, validated_data):
         return Member.objects.create(**validated_data)
 
 
-def percent_of(paid, target):
-    paid, target = Decimal(paid or 0), Decimal(target or 0)
-    if target and paid >= target:
-        return 100
-    return min(99, math.floor(paid / target * 100)) if target else 0
+class PayStartSerializer(serializers.Serializer):
+    phone = serializers.CharField(max_length=30)
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal("10"))
+
+    def validate_phone(self, value):
+        member = Member.objects.filter(phone=clean_phone(value), is_active=True).first()
+        if not member:
+            raise serializers.ValidationError("No registered member uses this phone number.")
+        return member
 
 
 class MemberSerializer(serializers.ModelSerializer):
@@ -77,7 +96,7 @@ class MemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
         fields = [
-            "id", "code", "name", "email", "phone", "mpesa_phone", "duration", "duration_display",
+            "id", "code", "name", "email", "phone", "duration", "duration_display",
             "target", "paid", "balance", "percent", "status", "is_active", "created_at",
         ]
 
@@ -103,19 +122,19 @@ class MemberSerializer(serializers.ModelSerializer):
 class MemberUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
-        fields = ["name", "email", "phone", "mpesa_phone", "duration", "target", "is_active"]
+        fields = ["name", "email", "phone", "duration", "target", "is_active"]
 
     def validate_name(self, value):
         return clean_name(value)
+
+    def validate_email(self, value):
+        return clean_email(value, exclude_pk=self.instance.pk)
 
     def validate_phone(self, value):
         phone = clean_phone(value)
         if Member.objects.filter(phone=phone).exclude(pk=self.instance.pk).exists():
             raise serializers.ValidationError("Another member already uses this phone number.")
         return phone
-
-    def validate_mpesa_phone(self, value):
-        return clean_phone(value)
 
     def validate_target(self, value):
         if value <= 0:
@@ -131,56 +150,40 @@ class MemberBriefSerializer(serializers.ModelSerializer):
 
 class PaymentSerializer(serializers.ModelSerializer):
     member = MemberBriefSerializer(read_only=True)
-    suggested_member = MemberBriefSerializer(read_only=True)
     status_display = serializers.CharField(source="get_status_display", read_only=True)
 
     class Meta:
         model = Payment
         fields = [
-            "id", "receipt_no", "mpesa_code", "amount", "payer_name", "payer_phone", "account_text",
-            "paid_at", "status", "status_display", "source", "member", "suggested_member", "note", "created_at",
+            "id", "receipt_no", "reference", "amount", "status", "status_display", "source", "channel",
+            "member", "paid_at", "note", "created_at",
         ]
 
 
 class ManualPaymentSerializer(serializers.Serializer):
+    """Treasurer records a payment made outside Paystack, e.g. cash."""
+
     member_id = serializers.PrimaryKeyRelatedField(queryset=Member.objects.filter(is_active=True), source="member")
     amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal("1"))
-    mpesa_code = serializers.CharField(required=False, allow_blank=True, max_length=24)
     paid_at = serializers.DateTimeField(required=False)
     note = serializers.CharField(required=False, allow_blank=True)
 
-    def validate_mpesa_code(self, value):
-        value = value.strip().upper()
-        if value and Payment.objects.filter(mpesa_code=value).exists():
-            raise serializers.ValidationError("A payment with this M-Pesa code already exists.")
-        return value
-
     def create(self, validated_data):
-        code = validated_data.get("mpesa_code") or f"MANUAL-{uuid.uuid4().hex[:8].upper()}"
-        member = validated_data["member"]
         return Payment.objects.create(
-            mpesa_code=code,
+            reference=f"MANUAL-{uuid.uuid4().hex[:8].upper()}",
+            member=validated_data["member"],
             amount=validated_data["amount"],
-            payer_name=member.name,
-            payer_phone=member.mpesa_phone,
-            account_text="Entered by treasurer",
             paid_at=validated_data.get("paid_at") or timezone.now(),
-            member=member,
-            status=Payment.RECORDED,
+            status=Payment.SUCCESS,
             source="manual",
             note=validated_data.get("note", ""),
         )
 
 
-class IncomingMessageSerializer(serializers.ModelSerializer):
-    status_display = serializers.CharField(source="get_status_display", read_only=True)
+class PaymentRequestSerializer(serializers.Serializer):
+    """Admin asks a member to pay: an email with a checkout link, and optionally an M-Pesa prompt."""
 
-    class Meta:
-        model = IncomingMessage
-        fields = ["id", "sender", "status", "status_display", "detail", "text", "created_at"]
-
-
-class NotificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = NotificationLog
-        fields = ["id", "kind", "channel", "status", "error", "created_at"]
+    member_id = serializers.PrimaryKeyRelatedField(queryset=Member.objects.filter(is_active=True), source="member")
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal("10"))
+    message = serializers.CharField(required=False, allow_blank=True, max_length=500)
+    mpesa = serializers.BooleanField(required=False, default=False)

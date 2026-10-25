@@ -1,15 +1,11 @@
+"""Vercel entry point: every request is rewritten here and handed to Django."""
 import os
 import sys
+from pathlib import Path
 
-# Set Django settings
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gongoni.settings')
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gongoni.settings")
 
-# Import and setup Django
-import django
-django.setup()
+from gongoni.wsgi import application  # noqa: E402
 
-# Import WSGI application
-from gongoni.wsgi import application
-
-# Vercel expects this
 app = application

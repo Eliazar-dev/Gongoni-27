@@ -1,5 +1,6 @@
 const TOKEN_KEY = 'gn27_token'
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+const API_BASE_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://127.0.0.1:8000' : 'https://gongoni-mission-backend-xi.vercel.app')
 
 export const getToken = () => {
   try { return localStorage.getItem(TOKEN_KEY) } catch { return null }

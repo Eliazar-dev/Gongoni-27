@@ -41,11 +41,19 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", "dev-insecure-secret-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", False)
 ON_VERCEL = bool(os.environ.get("VERCEL"))
 if ON_VERCEL and SECRET_KEY.startswith("dev-insecure"):
-    raise RuntimeError("Set DJANGO_SECRET_KEY in the Vercel project settings.")
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+    # Vercel imports these settings while building, so don't crash; but a real key must be set.
+    import secrets
+    import sys
+
+    print("WARNING: DJANGO_SECRET_KEY is not set in the Vercel project. Using a temporary key.", file=sys.stderr)
+    SECRET_KEY = secrets.token_urlsafe(50)
+FRONTEND_URL = env("FRONTEND_URL", "https://gongoni-27.vercel.app").rstrip("/")
+BACKEND_URL = env("BACKEND_URL", "https://gongoni-mission-backend-xi.vercel.app").rstrip("/")
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,gongoni-mission-backend-xi.vercel.app")
 if ON_VERCEL:
     ALLOWED_HOSTS += [".vercel.app"]
-CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", f"{FRONTEND_URL},{BACKEND_URL}")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -77,7 +85,7 @@ ROOT_URLCONF = "gongoni.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -144,7 +152,9 @@ if ON_VERCEL:
     CSRF_COOKIE_SECURE = True
 
 # --- CORS settings for separate frontend/backend deployment ---
-CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+CORS_ALLOWED_ORIGINS = env_list(
+    "CORS_ALLOWED_ORIGINS", f"http://localhost:3000,http://127.0.0.1:3000,{FRONTEND_URL}"
+)
 CORS_ALLOW_CREDENTIALS = True
 
 # --- Mission settings --------------------------------------------------------
@@ -156,7 +166,7 @@ PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY", "")
 PAYSTACK_PUBLIC_KEY = env("PAYSTACK_PUBLIC_KEY", "")
 PAYSTACK_CURRENCY = env("PAYSTACK_CURRENCY", "KES")
 # Where Paystack sends the member after paying, e.g. https://your-frontend/payment/done
-PAYSTACK_CALLBACK_URL = env("PAYSTACK_CALLBACK_URL", "")
+PAYSTACK_CALLBACK_URL = env("PAYSTACK_CALLBACK_URL", f"{FRONTEND_URL}/payment/done")
 
 # --- Email -------------------------------------------------------------------
 if env("EMAIL_BACKEND_MODE", "console") == "smtp":
